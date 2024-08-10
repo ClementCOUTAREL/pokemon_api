@@ -9,5 +9,7 @@ namespace PokemonApi.Interface
         ICollection<Owner> GetOwnerOfAPokemon(int pokeId);
         ICollection<Pokemon> GetPokemonOfAnOwner(int ownerId);
         bool isOwnerExists(int ownerId);
+        bool CreateOwner(Owner owner);
+        bool Save();
     }
 }

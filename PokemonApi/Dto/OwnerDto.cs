@@ -1,4 +1,6 @@
-﻿namespace PokemonApi.Dto
+﻿using PokemonApi.Models;
+
+namespace PokemonApi.Dto
 {
     public class OwnerDto
     {

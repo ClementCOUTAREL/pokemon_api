@@ -11,13 +11,16 @@ namespace PokemonApi.Controllers
     public class OwnerController : Controller
     {
         private readonly IOwnerRepository _ownerRepository;
+        private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         public OwnerController(
             IOwnerRepository ownerRepository,
-            IMapper mapper) 
+            ICountryRepository countryRepository,
+            IMapper mapper)
         {
             _ownerRepository = ownerRepository;
             _mapper = mapper;
+            _countryRepository = countryRepository;
         }
 
         [HttpGet]
@@ -37,12 +40,12 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(200, Type = typeof(Owner))]
         [ProducesResponseType(400)]
         public IActionResult GetOwner(int ownerId)
-        { 
-            if(!_ownerRepository.isOwnerExists(ownerId)) return BadRequest();
+        {
+            if (!_ownerRepository.isOwnerExists(ownerId)) return BadRequest();
 
             var owner = _mapper.Map<OwnerDto>(_ownerRepository.GetOwner(ownerId));
 
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
 
             return Ok(owner);
         }
@@ -54,7 +57,7 @@ namespace PokemonApi.Controllers
         {
             var owners = _mapper.Map<List<OwnerDto>>(_ownerRepository.GetOwnerOfAPokemon(pokeId));
 
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
 
             return Ok(owners);
         }
@@ -62,7 +65,7 @@ namespace PokemonApi.Controllers
         [HttpGet("{ownerId}/pokemons")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
         [ProducesResponseType(400)]
-        public IActionResult GetPokemonOfAnOwner (int ownerId)
+        public IActionResult GetPokemonOfAnOwner(int ownerId)
         {
             if (!_ownerRepository.isOwnerExists(ownerId)) return BadRequest();
 
@@ -71,6 +74,37 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid) return BadRequest();
 
             return Ok(pokemons);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(422)]
+        public IActionResult CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerToCreate)
+        {
+            if (ownerToCreate == null) return BadRequest(ModelState);
+
+            var owner = _ownerRepository.GetOwners().Where(o => o.LastName.Trim().ToUpper() == ownerToCreate.LastName.Trim().ToUpper()).FirstOrDefault();
+
+            if (owner != null)
+            {
+                ModelState.AddModelError("", "owner already exists");
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, ModelState);
+            }
+
+            if(!ModelState.IsValid) return BadRequest(ModelState);    
+
+            var ownerMap = _mapper.Map<Owner>(ownerToCreate);
+
+            ownerMap.Country = _countryRepository.GetCountry(countryId);
+
+            if(!_ownerRepository.CreateOwner(ownerMap))
+            {
+                ModelState.AddModelError("", "An error occured while saving");
+                return StatusCode(StatusCodes.Status500InternalServerError,ModelState);
+            }
+
+            return Ok("Successfully created");
+
         }
     }
 }

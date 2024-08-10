@@ -38,5 +38,16 @@ namespace PokemonApi.Repository
         {
             return _context.Owners.Any(o => o.Id == ownerId);
         }
+
+        public bool CreateOwner(Owner owner)
+        {
+            _context.Add(owner);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
+        }
     }
 }

@@ -21,6 +21,11 @@ namespace PokemonApi.Repository
             return _context.Countries.OrderBy(c => c.Id).ToList();
         }
 
+        public Country GetCountry(int countryId)
+        {
+            return _context.Countries.Where(c => c.Id == countryId).FirstOrDefault();
+        }
+
         public Country GetCountryByOwner(int ownerId)
         {
             return _context.Owners.Where(o => o.Id == ownerId).Select(c => c.Country).FirstOrDefault();
@@ -46,5 +51,7 @@ namespace PokemonApi.Repository
         {
             return _context.SaveChanges() > 0 ? true : false;
         }
+
+        
     }
 }
