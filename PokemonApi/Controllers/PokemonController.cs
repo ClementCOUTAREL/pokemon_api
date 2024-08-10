@@ -63,5 +63,6 @@ namespace PokemonApi.Controllers
 
             return Ok(rating);
         }
+
     }
 }

@@ -8,5 +8,7 @@ namespace PokemonApi.Interface
         Category GetCategory(int catId);
         ICollection<Pokemon> GetPokemonByCategory(int catId);
         bool isCategoryExists(int catId);
+        bool CreateCategory(Category category);
+        bool Save();
     }
 }

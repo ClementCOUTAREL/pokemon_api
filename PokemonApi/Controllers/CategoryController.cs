@@ -12,7 +12,7 @@ namespace PokemonApi.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        public CategoryController(ICategoryRepository categoryRepository,IMapper mapper)
+        public CategoryController(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
@@ -35,7 +35,7 @@ namespace PokemonApi.Controllers
         public IActionResult GetCategory(int catId)
         {
 
-            if(!_categoryRepository.isCategoryExists(catId))
+            if (!_categoryRepository.isCategoryExists(catId))
                 return BadRequest();
 
             var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(catId));
@@ -61,6 +61,40 @@ namespace PokemonApi.Controllers
                 return BadRequest();
 
             return Ok(pokemons);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCategory(
+            [FromBody] CategoryDto categoryToCreate)
+        {
+
+            if(categoryToCreate == null) return BadRequest(ModelState);
+
+            var category = _categoryRepository
+                .GetCategories()
+                .Where(c => c.Name.Trim().ToUpper() == categoryToCreate.Name.Trim().ToUpper())
+                .FirstOrDefault();
+        
+            if(category != null)
+            {
+                ModelState.AddModelError("", "category already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var categoryMap = _mapper.Map<Category>(categoryToCreate);
+
+            if(!_categoryRepository.CreateCategory(categoryMap))
+            {
+                ModelState.AddModelError("", "Something wrong happened while saving");
+                return StatusCode(500, ModelState);
+            };
+
+            return Ok("Successfully created");
         }
     }
 }

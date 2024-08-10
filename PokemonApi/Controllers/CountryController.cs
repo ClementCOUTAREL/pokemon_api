@@ -59,5 +59,31 @@ namespace PokemonApi.Controllers
 
             return Ok(owners);
         }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateCountry(CountryDto countryToCreate)
+        {
+            if (countryToCreate == null) return BadRequest(ModelState);
+
+            var country = _countryRepository.GetCountries().Where(c => c.Name == countryToCreate.Name).FirstOrDefault();
+
+            if(country != null)
+            {
+                ModelState.AddModelError("", "country already exists");
+                return StatusCode(422, ModelState);
+            }
+
+            var countryMap = _mapper.Map<Country>(countryToCreate);
+
+            if (!_countryRepository.CreateCountry(countryMap))
+            {
+                ModelState.AddModelError("", "An error occured while saving");
+                return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+            }
+
+            return Ok("Successfully created");
+        }
     }
 }
