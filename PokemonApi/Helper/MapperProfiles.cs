@@ -9,6 +9,9 @@ namespace PokemonApi.Helper
         public MapperProfiles()
         {
             CreateMap<Pokemon, PokemonDto>();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<Country, CountryDto>();
+            CreateMap<Owner, OwnerDto>();
         }
     }
 }

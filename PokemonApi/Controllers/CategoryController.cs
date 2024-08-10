@@ -38,7 +38,7 @@ namespace PokemonApi.Controllers
             if(!_categoryRepository.isCategoryExists(catId))
                 return BadRequest();
 
-            var category = _categoryRepository.GetCategory(catId);
+            var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(catId));
 
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -48,7 +48,8 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{catId}/pokemon")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
-        public IActionResult GetCategoryPokemons(int catId)
+        [ProducesResponseType(400)]
+        public IActionResult GetPokemonByCategoryId(int catId)
         {
 
             if (!_categoryRepository.isCategoryExists(catId))
