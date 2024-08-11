@@ -76,8 +76,7 @@ namespace PokemonApi.Repository
 
         public bool Save()
         {
-            var saved = _context.SaveChanges();
-            return saved > 0 ? true : false;
+            return _context.SaveChanges() > 0 ? true : false;
         }
     }
 }

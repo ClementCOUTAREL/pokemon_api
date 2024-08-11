@@ -30,5 +30,16 @@ namespace PokemonApi.Repository
         {
             return _context.Reviews.Any(r => r.Id == reviewId);
         }
+
+        public bool CreateReview(Review review)
+        {
+            _context.Add(review);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
+        }
     }
 }

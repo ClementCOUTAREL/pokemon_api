@@ -32,5 +32,16 @@ namespace PokemonApi.Repository
         {
             return _context.Reviewers.Any(r => r.Id == reviewerId);
         }
+
+        public bool CreateReviewer(Reviewer reviewer)
+        {
+            _context.Add(reviewer);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            return _context.SaveChanges() > 0 ? true : false;
+        }
     }
 }

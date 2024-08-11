@@ -12,12 +12,18 @@ namespace PokemonApi.Controllers
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IPokemonRepository _pokemonRepository;
+        private readonly IReviewerRepository _reviewerRepository;
         private readonly IMapper _mapper;
 
-        public ReviewController(IReviewRepository reviewRepository, IPokemonRepository pokemonRepository, IMapper mapper)
+        public ReviewController(
+            IReviewRepository reviewRepository,
+            IPokemonRepository pokemonRepository,
+            IReviewerRepository reviewerRepository,
+            IMapper mapper)
         {
             _reviewRepository = reviewRepository;
             _pokemonRepository = pokemonRepository;
+            _reviewerRepository = reviewerRepository;
             _mapper = mapper;
         }
 
@@ -60,6 +66,41 @@ namespace PokemonApi.Controllers
             if (!ModelState.IsValid) return BadRequest();
 
             return Ok(reviews);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewToCreate)
+        { 
+            if(reviewToCreate == null) return BadRequest(ModelState);
+
+            var review = _reviewRepository
+                .GetReviews()
+                .Where(r => r.Title.Trim().ToUpper() == reviewToCreate.Title.Trim().ToUpper())
+                .FirstOrDefault();
+
+            if(review != null)
+            {
+                ModelState.AddModelError("", "review already exists");
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, ModelState);
+            }
+
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+
+            var reviewMap = _mapper.Map<Review>(reviewToCreate);
+
+            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokeId);
+            reviewMap.Reviewer = _reviewerRepository.GetReviewerById(reviewerId);
+
+            if(!_reviewRepository.CreateReview(reviewMap))
+            {
+                ModelState.AddModelError("", "An error occured while saving");
+                return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+            }
+
+            return Ok("Successfully created");
+
         }
     }
 }
