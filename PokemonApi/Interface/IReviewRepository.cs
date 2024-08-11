@@ -10,6 +10,7 @@ namespace PokemonApi.Interface
         bool isReviewExists(int reviewId);
         bool CreateReview(Review review);
         bool UpdateReview(Review review);
+        bool DeleteReview(Review review);
         bool Save();
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Dto;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using System.Net;
 
 namespace PokemonApi.Controllers
 {
@@ -103,6 +104,23 @@ namespace PokemonApi.Controllers
             {
                 ModelState.AddModelError("", "An error occured while updating");
                 return StatusCode(StatusCodes.Status500InternalServerError,ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{countryId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult DeleteCountry(int countryId)
+        {
+            if (!_countryRepository.isCountryExists(countryId)) return BadRequest(ModelState);
+            var country = _countryRepository.GetCountry(countryId);
+
+            if(!_countryRepository.DeleteCountry(country))
+            {
+                ModelState.AddModelError("", "An error occured while deleting");
+                return StatusCode((int)HttpStatusCode.InternalServerError,ModelState);
             }
 
             return NoContent();

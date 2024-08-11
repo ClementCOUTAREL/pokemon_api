@@ -130,5 +130,22 @@ namespace PokemonApi.Controllers
 
         }
 
+        [HttpDelete("{pokeId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult DeletePokemon(int pokeId)
+        {
+            if (!_pokemonRepository.IsPokemonExists(pokeId)) return BadRequest(ModelState);
+            var pokemon = _pokemonRepository.GetPokemon(pokeId);
+
+            if (!_pokemonRepository.DeletePokemon(pokemon))
+            {
+                ModelState.AddModelError("", "An error occured while deleting");
+                return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);
+            }
+
+            return NoContent();
+        }
+
     }
 }

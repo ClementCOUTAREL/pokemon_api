@@ -126,5 +126,22 @@ namespace PokemonApi.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{reviewId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult DeleteReview(int reviewId)
+        {
+            if (!_reviewRepository.isReviewExists(reviewId)) return BadRequest(ModelState);
+            var review = _reviewRepository.GetReviewById(reviewId);
+
+            if (!_reviewRepository.DeleteReview(review))
+            {
+                ModelState.AddModelError("", "An error occured while deleting");
+                return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }

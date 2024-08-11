@@ -11,6 +11,7 @@ namespace PokemonApi.Interface
         public bool IsPokemonExists(int pokeId);
         bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
         bool UpdatePokemon(Pokemon pokemon);
+        bool DeletePokemon(Pokemon pokemon);
         bool Save();
     }
 }

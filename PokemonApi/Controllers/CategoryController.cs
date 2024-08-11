@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Dto;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using System.Net;
 
 namespace PokemonApi.Controllers
 {
@@ -102,18 +103,37 @@ namespace PokemonApi.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
         {
-            if(categoryToUpdate == null) return BadRequest(ModelState);
+            if (categoryToUpdate == null) return BadRequest(ModelState);
 
             if (_categoryRepository.GetCategory(categoryId) == null) return NotFound(ModelState);
 
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var categoryMap = _mapper.Map<Category>(categoryToUpdate);
 
-            if(!_categoryRepository.UpdateCategory(categoryMap))
+            if (!_categoryRepository.UpdateCategory(categoryMap))
             {
                 ModelState.AddModelError("", "An error occured while updating");
                 return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{catId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult DeleteCategory(int catId)
+        {
+
+            if (!_categoryRepository.isCategoryExists(catId)) return NotFound();
+
+            var category = _categoryRepository.GetCategory(catId);
+
+            if(!_categoryRepository.DeleteCategory(category))
+            {
+                ModelState.AddModelError("", "An error occured while deleting");
+                return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);
             }
 
             return NoContent();

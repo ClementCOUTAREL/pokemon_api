@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Dto;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using PokemonApi.Repository;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -112,6 +113,23 @@ namespace PokemonApi.Controllers
             {
                 ModelState.AddModelError("", "An error occured while updating");
                 return StatusCode((int)HttpStatusCode.InternalServerError,ModelState);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{reviewerId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult DeletePokemon(int reviewerId)
+        {
+            if (!_reviewerRepository.isReviewerExists(reviewerId)) return BadRequest(ModelState);
+            var reviewer = _reviewerRepository.GetReviewerById(reviewerId);
+
+            if (!_reviewerRepository.DeleteReviewer(reviewer))
+            {
+                ModelState.AddModelError("", "An error occured while deleting");
+                return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);
             }
 
             return NoContent();
