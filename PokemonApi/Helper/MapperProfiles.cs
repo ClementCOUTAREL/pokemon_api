@@ -9,6 +9,7 @@ namespace PokemonApi.Helper
         public MapperProfiles()
         {
             CreateMap<Pokemon, PokemonDto>().ReverseMap();
+            CreateMap<Pokemon, PokemonToUpdateDto>().ReverseMap();
             
             CreateMap<Category, CategoryDto>().ReverseMap();
             
