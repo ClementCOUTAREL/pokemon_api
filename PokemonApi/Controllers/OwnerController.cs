@@ -106,5 +106,27 @@ namespace PokemonApi.Controllers
             return Ok("Successfully created");
 
         }
+
+        [HttpPut("{ownerId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult UpdateOwner(int ownerId, [FromBody] OwnerDto ownerToUpdate)
+        { 
+            if(ownerToUpdate == null) return BadRequest(ModelState);
+
+            if(!_ownerRepository.isOwnerExists(ownerId)) return BadRequest(ModelState);
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var ownerMap = _mapper.Map<Owner>(ownerToUpdate);
+
+            if(!_ownerRepository.UpdateOwner(ownerMap))
+            { 
+                ModelState.AddModelError("", "An error occured while updating");
+                return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }

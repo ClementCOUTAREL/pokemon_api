@@ -85,5 +85,27 @@ namespace PokemonApi.Controllers
 
             return Ok("Successfully created");
         }
+
+        [HttpPut("{countryId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult UpdateCountry(int countryId, [FromBody] CountryDto countryToUpdate)
+        {
+            if (countryToUpdate == null) return BadRequest(ModelState);
+
+            if (!_countryRepository.isCountryExists(countryId)) return NotFound();
+
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+
+            var countryMap = _mapper.Map<Country>(countryToUpdate);
+
+            if(!_countryRepository.UpdateCountry(countryMap))
+            {
+                ModelState.AddModelError("", "An error occured while updating");
+                return StatusCode(StatusCodes.Status500InternalServerError,ModelState);
+            }
+
+            return NoContent();
+        }
     }
 }

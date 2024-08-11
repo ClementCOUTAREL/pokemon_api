@@ -70,14 +70,14 @@ namespace PokemonApi.Controllers
             [FromBody] CategoryDto categoryToCreate)
         {
 
-            if(categoryToCreate == null) return BadRequest(ModelState);
+            if (categoryToCreate == null) return BadRequest(ModelState);
 
             var category = _categoryRepository
                 .GetCategories()
                 .Where(c => c.Name.Trim().ToUpper() == categoryToCreate.Name.Trim().ToUpper())
                 .FirstOrDefault();
-        
-            if(category != null)
+
+            if (category != null)
             {
                 ModelState.AddModelError("", "category already exists");
                 return StatusCode(422, ModelState);
@@ -88,7 +88,7 @@ namespace PokemonApi.Controllers
 
             var categoryMap = _mapper.Map<Category>(categoryToCreate);
 
-            if(!_categoryRepository.CreateCategory(categoryMap))
+            if (!_categoryRepository.CreateCategory(categoryMap))
             {
                 ModelState.AddModelError("", "Something wrong happened while saving");
                 return StatusCode(500, ModelState);
@@ -96,5 +96,28 @@ namespace PokemonApi.Controllers
 
             return Ok("Successfully created");
         }
+
+        [HttpPut("{categoryId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
+        {
+            if(categoryToUpdate == null) return BadRequest(ModelState);
+
+            if (_categoryRepository.GetCategory(categoryId) == null) return NotFound(ModelState);
+
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+
+            var categoryMap = _mapper.Map<Category>(categoryToUpdate);
+
+            if(!_categoryRepository.UpdateCategory(categoryMap))
+            {
+                ModelState.AddModelError("", "An error occured while updating");
+                return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
+            }
+
+            return NoContent();
+        }
+
     }
 }
