@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Dto;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using System.Net;
 
 namespace PokemonApi.Controllers
 {
@@ -91,6 +92,29 @@ namespace PokemonApi.Controllers
             }
 
             return Ok("Successfully created");
+        }
+
+        [HttpPut("{reviewerId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public IActionResult UpdateReviewer(int reviewerId,  [FromBody] ReviewerDto reviewerToUpdate)
+        {
+
+            if (reviewerToUpdate == null) return BadRequest(ModelState);
+
+            if (!_reviewerRepository.isReviewerExists(reviewerId)) return NotFound();
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var reviewerMap = _mapper.Map<Reviewer>(reviewerToUpdate);
+
+            if(!_reviewerRepository.UpdateReviewer(reviewerMap))
+            {
+                ModelState.AddModelError("", "An error occured while updating");
+                return StatusCode((int)HttpStatusCode.InternalServerError,ModelState);
+            }
+
+            return NoContent();
         }
 
     }
