@@ -1,4 +1,4 @@
-﻿namespace PokemonApi.Dto
+﻿namespace PokemonApi.Dto.Category
 {
     public class CategoryDto
     {

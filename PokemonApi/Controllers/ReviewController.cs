@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.Dto.Review;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using System.Net;
@@ -8,8 +8,8 @@ using System.Net;
 namespace PokemonApi.Controllers
 {
     [Route("api/[Controller]")]
-    [Controller]
-    public class ReviewController : Controller
+    [ApiController]
+    public class ReviewController : ControllerBase
     {
         private readonly IReviewRepository _reviewRepository;
         private readonly IPokemonRepository _pokemonRepository;

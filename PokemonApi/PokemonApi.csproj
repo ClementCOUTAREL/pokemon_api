@@ -7,6 +7,42 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Shared\NewFolder\**" />
+    <Compile Remove="Shared\Validation\NewFolder1\**" />
+    <Compile Remove="Shared\Validation\NewFolder2\**" />
+    <Compile Remove="Shared\Validation\NewFolder3\**" />
+    <Compile Remove="Shared\Validation\NewFolder4\**" />
+    <Compile Remove="Shared\Validation\NewFolder\**" />
+    <Content Remove="Shared\NewFolder\**" />
+    <Content Remove="Shared\Validation\NewFolder1\**" />
+    <Content Remove="Shared\Validation\NewFolder2\**" />
+    <Content Remove="Shared\Validation\NewFolder3\**" />
+    <Content Remove="Shared\Validation\NewFolder4\**" />
+    <Content Remove="Shared\Validation\NewFolder\**" />
+    <EmbeddedResource Remove="Shared\NewFolder\**" />
+    <EmbeddedResource Remove="Shared\Validation\NewFolder1\**" />
+    <EmbeddedResource Remove="Shared\Validation\NewFolder2\**" />
+    <EmbeddedResource Remove="Shared\Validation\NewFolder3\**" />
+    <EmbeddedResource Remove="Shared\Validation\NewFolder4\**" />
+    <EmbeddedResource Remove="Shared\Validation\NewFolder\**" />
+    <None Remove="Shared\NewFolder\**" />
+    <None Remove="Shared\Validation\NewFolder1\**" />
+    <None Remove="Shared\Validation\NewFolder2\**" />
+    <None Remove="Shared\Validation\NewFolder3\**" />
+    <None Remove="Shared\Validation\NewFolder4\**" />
+    <None Remove="Shared\Validation\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Shared\Validation\CategoryExistsFilterAttribute.cs" />
+    <Compile Remove="Shared\Validation\CategoryExistsValidationAttribute.cs" />
+    <Compile Remove="Shared\Validation\CategoryRequestEmptyValidationAttribute.cs" />
+    <Compile Remove="Shared\Validation\CategoryValidation.cs" />
+    <Compile Remove="Shared\Validation\CategoryValidators.cs" />
+    <Compile Remove="Shared\Validation\VategoryValidators.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>

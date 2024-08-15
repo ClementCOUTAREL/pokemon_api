@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.Dto.Country;
+using PokemonApi.Dto.Owner;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using System.Net;
@@ -8,8 +9,8 @@ using System.Net;
 namespace PokemonApi.Controllers
 {
     [Route("api/[controller]")]
-    [Controller]
-    public class CountryController : Controller
+    [ApiController]
+    public class CountryController : ControllerBase
     {
 
         private readonly ICountryRepository _countryRepository;

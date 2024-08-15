@@ -1,15 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PokemonApi.Dto;
+using PokemonApi.Dto.Category;
+using PokemonApi.Dto.Pokemon;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Category;
 using System.Net;
 
 namespace PokemonApi.Controllers
 {
     [Route("api/[controller]")]
-    [Controller]
-    public class CategoryController : Controller
+    [ApiController]
+    public class CategoryController : ControllerBase
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
@@ -20,59 +23,51 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))]
         public IActionResult GetCategories()
         {
             var categories = _categoryRepository.GetCategories();
 
-            if (!ModelState.IsValid)
-                return BadRequest();
-
             return Ok(categories);
         }
 
         [HttpGet("{catId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
+        [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(Category))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public IActionResult GetCategory(int catId)
         {
-
-            if (!_categoryRepository.isCategoryExists(catId))
-                return BadRequest();
-
             var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(catId));
-
-            if (!ModelState.IsValid)
-                return BadRequest();
 
             return Ok(category);
         }
 
         [HttpGet("{catId}/pokemon")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
+        [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
         [ProducesResponseType(400)]
         public IActionResult GetPokemonByCategoryId(int catId)
         {
 
-            if (!_categoryRepository.isCategoryExists(catId))
-                return BadRequest();
-
             var pokemons = _mapper.Map<List<PokemonDto>>(_categoryRepository.GetPokemonByCategory(catId));
-
-            if (!ModelState.IsValid)
-                return BadRequest();
 
             return Ok(pokemons);
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         public IActionResult CreateCategory(
-            [FromBody] CategoryDto categoryToCreate)
+            [FromBody] CreateCategoryRequest categoryToCreate)
         {
-
-            if (categoryToCreate == null) return BadRequest(ModelState);
-
             var category = _categoryRepository
                 .GetCategories()
                 .Where(c => c.Name.Trim().ToUpper() == categoryToCreate.Name.Trim().ToUpper())
@@ -83,10 +78,7 @@ namespace PokemonApi.Controllers
                 ModelState.AddModelError("", "category already exists");
                 return StatusCode(422, ModelState);
             }
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            
             var categoryMap = _mapper.Map<Category>(categoryToCreate);
 
             if (!_categoryRepository.CreateCategory(categoryMap))
@@ -99,6 +91,7 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{categoryId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
@@ -106,8 +99,6 @@ namespace PokemonApi.Controllers
             if (categoryToUpdate == null) return BadRequest(ModelState);
 
             if (_categoryRepository.GetCategory(categoryId) == null) return NotFound(ModelState);
-
-            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var categoryMap = _mapper.Map<Category>(categoryToUpdate);
 
@@ -121,13 +112,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpDelete("{catId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public IActionResult DeleteCategory(int catId)
         {
-
-            if (!_categoryRepository.isCategoryExists(catId)) return NotFound();
-
             var category = _categoryRepository.GetCategory(catId);
 
             if(!_categoryRepository.DeleteCategory(category))
@@ -140,4 +130,5 @@ namespace PokemonApi.Controllers
         }
 
     }
+
 }
