@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PokemonApi.Dto.Review;
 using PokemonApi.Interface;
 using PokemonApi.Models;
+using PokemonApi.Shared.Filters;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -29,57 +30,53 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
         [ProducesResponseType(400)]
-        public IActionResult GetReviews()
+        async public Task<IActionResult> GetReviews()
         {
-            var reviews = _mapper.Map<List<Review>>(_reviewRepository.GetReviews());
-
-            if (!ModelState.IsValid)
-                return BadRequest();
+            var reviews = _mapper.Map<List<Review>>(await _reviewRepository.GetReviews());
 
             return Ok(reviews);
         }
 
         [HttpGet("{reviewId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(Review))]
         [ProducesResponseType(400)]
-        public IActionResult GetReview(int reviewId)
+        async public Task<IActionResult> GetReview(int reviewId)
         { 
-            if(!_reviewRepository.isReviewExists(reviewId)) return BadRequest();
+            if(!await _reviewRepository.isReviewExists(reviewId)) return BadRequest();
 
-            var review = _mapper.Map<Review>(_reviewRepository.GetReviewById(reviewId));
-
-            if(!ModelState.IsValid) return BadRequest();
+            var review = _mapper.Map<Review>(await _reviewRepository.GetReviewById(reviewId));
 
             return Ok(review);
         }
 
         [HttpGet("pokemon/{pokeId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
         [ProducesResponseType(400)]
-        public IActionResult GetReviewsOfAPokemon(int pokeId)
+        async public Task<IActionResult> GetReviewsOfAPokemon(int pokeId)
         {
-            if(!_pokemonRepository.IsPokemonExists(pokeId)) return BadRequest();
+            if(!await _pokemonRepository.IsPokemonExists(pokeId)) return BadRequest();
 
-            var reviews = _mapper.Map<List<Review>>(_reviewRepository.GetReviewsOfAPokemon(pokeId));
-
-            if (!ModelState.IsValid) return BadRequest();
+            var reviews = _mapper.Map<List<Review>>(await _reviewRepository.GetReviewsOfAPokemon(pokeId));
 
             return Ok(reviews);
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewToCreate)
+        async public Task<IActionResult> CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewToCreate)
         { 
             if(reviewToCreate == null) return BadRequest(ModelState);
 
-            var review = _reviewRepository
-                .GetReviews()
-                .Where(r => r.Title.Trim().ToUpper() == reviewToCreate.Title.Trim().ToUpper())
-                .FirstOrDefault();
+            var reviews = await _reviewRepository.GetReviews();
+
+            var review = reviews.Where(r => r.Title.Trim().ToUpper() == reviewToCreate.Title.Trim().ToUpper()).FirstOrDefault();
 
             if(review != null)
             {
@@ -87,14 +84,12 @@ namespace PokemonApi.Controllers
                 return StatusCode(StatusCodes.Status422UnprocessableEntity, ModelState);
             }
 
-            if(!ModelState.IsValid) return BadRequest(ModelState);
-
             var reviewMap = _mapper.Map<Review>(reviewToCreate);
 
-            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokeId);
-            reviewMap.Reviewer = _reviewerRepository.GetReviewerById(reviewerId);
+            reviewMap.Pokemon = await _pokemonRepository.GetPokemon(pokeId);
+            reviewMap.Reviewer = await _reviewerRepository.GetReviewerById(reviewerId);
 
-            if(!_reviewRepository.CreateReview(reviewMap))
+            if(!await _reviewRepository.CreateReview(reviewMap))
             {
                 ModelState.AddModelError("", "An error occured while saving");
                 return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
@@ -105,20 +100,20 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{reviewId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public IActionResult UpdateReview(int reviewId,[FromQuery] int pokeId, [FromQuery] int reviewerId, [FromBody] ReviewDto reviewToUpdate)
+        async public Task<IActionResult> UpdateReview(int reviewId,[FromQuery] int pokeId, [FromQuery] int reviewerId, [FromBody] ReviewDto reviewToUpdate)
         {
             if( reviewToUpdate == null) return BadRequest(ModelState);
-            if(!_reviewRepository.isReviewExists(reviewId)) return NotFound();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if(!await _reviewRepository.isReviewExists(reviewId)) return NotFound();
 
             var reviewMap = _mapper.Map<Review>(reviewToUpdate);
 
-            reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokeId);
-            reviewMap.Reviewer = _reviewerRepository.GetReviewerById(reviewerId);
+            reviewMap.Pokemon = await _pokemonRepository.GetPokemon(pokeId);
+            reviewMap.Reviewer = await _reviewerRepository.GetReviewerById(reviewerId);
 
-            if(!_reviewRepository.UpdateReview(reviewMap))
+            if(!await _reviewRepository.UpdateReview(reviewMap))
             {
                 ModelState.AddModelError("", "An error occured while updating");
                 return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
@@ -128,14 +123,15 @@ namespace PokemonApi.Controllers
         }
 
         [HttpDelete("{reviewId}")]
+        [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public IActionResult DeleteReview(int reviewId)
+        async public Task<IActionResult> DeleteReview(int reviewId)
         {
-            if (!_reviewRepository.isReviewExists(reviewId)) return BadRequest(ModelState);
-            var review = _reviewRepository.GetReviewById(reviewId);
+            if (!await _reviewRepository.isReviewExists(reviewId)) return BadRequest(ModelState);
+            var review = await _reviewRepository.GetReviewById(reviewId);
 
-            if (!_reviewRepository.DeleteReview(review))
+            if (!await _reviewRepository.DeleteReview(review))
             {
                 ModelState.AddModelError("", "An error occured while deleting");
                 return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);

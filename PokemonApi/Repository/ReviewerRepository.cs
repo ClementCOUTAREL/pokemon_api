@@ -1,4 +1,5 @@
-﻿using PokemonApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 
@@ -13,47 +14,47 @@ namespace PokemonApi.Repository
             _context = context; 
         }
 
-        public ICollection<Reviewer> GetReviewers()
+        async public Task<ICollection<Reviewer>> GetReviewers()
         {
-           return _context.Reviewers.OrderBy(r => r.Id).ToList();
+           return await _context.Reviewers.OrderBy(r => r.Id).ToListAsync();
         }
 
-        public Reviewer GetReviewerById(int reviewerId)
+        async public Task<Reviewer> GetReviewerById(int reviewerId)
         {
-            return _context.Reviewers.Where(r => r.Id == reviewerId).FirstOrDefault();
+            return await _context.Reviewers.Where(r => r.Id == reviewerId).FirstOrDefaultAsync();
         }
 
-        public ICollection<Review> GetReviewsByReviewer(int reviewerId)
+        async public Task<ICollection<Review>> GetReviewsByReviewer(int reviewerId)
         {
-            return _context.Reviews.Where(r => r.Reviewer.Id == reviewerId).ToList();
+            return await _context.Reviews.Where(r => r.Reviewer.Id == reviewerId).ToListAsync();
         }
 
-        public bool isReviewerExists(int reviewerId)
+        async public Task<bool> isReviewerExists(int reviewerId)
         {
-            return _context.Reviewers.Any(r => r.Id == reviewerId);
+            return await _context.Reviewers.AnyAsync(r => r.Id == reviewerId);
         }
 
-        public bool CreateReviewer(Reviewer reviewer)
+        async public Task<bool> CreateReviewer(Reviewer reviewer)
         {
             _context.Add(reviewer);
-            return Save();
+            return await Save();
         }
 
-        public bool Save()
-        {
-            return _context.SaveChanges() > 0 ? true : false;
-        }
-
-        public bool UpdateReviewer(Reviewer reviewer)
+        async public Task<bool> UpdateReviewer(Reviewer reviewer)
         {
             _context.Update(reviewer);
-            return Save();
+            return await Save();
         }
 
-        public bool DeleteReviewer(Reviewer reviewer)
+        async public Task<bool> DeleteReviewer(Reviewer reviewer)
         {
             _context.Remove(reviewer);
-            return Save();
+            return await Save();
+        }
+
+        async public Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0 ? true : false;
         }
     }
 }

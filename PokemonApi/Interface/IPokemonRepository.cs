@@ -4,14 +4,14 @@ namespace PokemonApi.Interface
 {
     public interface IPokemonRepository
     {
-        public ICollection<Pokemon> GetPokemons();
-        public Pokemon GetPokemon(int pokeId);
-        public Pokemon GetPokemon(string name);
-        public decimal GetPokemonRating(int pokeId);
-        public bool IsPokemonExists(int pokeId);
-        bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
-        bool UpdatePokemon(Pokemon pokemon);
-        bool DeletePokemon(Pokemon pokemon);
-        bool Save();
+        Task<ICollection<Pokemon>> GetPokemons();
+        Task<Pokemon> GetPokemon(int pokeId);
+        Task<Pokemon> GetPokemon(string name);
+        Task<decimal> GetPokemonRating(int pokeId);
+        Task<bool> IsPokemonExists(int pokeId);
+        Task<bool> CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
+        Task<bool> UpdatePokemon(Pokemon pokemon);
+        Task<bool> DeletePokemon(Pokemon pokemon);
+        Task<bool> Save();
     }
 }

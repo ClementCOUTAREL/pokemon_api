@@ -133,7 +133,7 @@ namespace PokemonApi.Controllers
         async public Task<IActionResult> DeleteOwner(int ownerId)
         {
             if (!await _ownerRepository.isOwnerExists(ownerId)) return BadRequest(ModelState);
-            var owner = _ownerRepository.GetOwner(ownerId);
+            var owner = await _ownerRepository.GetOwner(ownerId);
 
             if (!await _ownerRepository.DeleteOwner(owner))
             {
