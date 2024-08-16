@@ -26,11 +26,12 @@ namespace PokemonApi.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Reviewer>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Reviewer>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReviewers()
         {
-            var reviewers = _mapper.Map<List<ReviewerDto>>(await _reviewerRepository.GetReviewers());
+            var reviewers = _mapper.Map<List<GetReviewerRequest>>(await _reviewerRepository.GetReviewers());
 
             return Ok(reviewers);
 
@@ -39,11 +40,13 @@ namespace PokemonApi.Controllers
         [HttpGet("{reviewerId}")]
         [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(Reviewer))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Reviewer))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReviewers(int reviewerId)
         {
-            var reviewer = _mapper.Map<ReviewerDto>(await _reviewerRepository.GetReviewerById(reviewerId));
+            var reviewer = _mapper.Map<GetReviewerRequest>(await _reviewerRepository.GetReviewerById(reviewerId));
 
             return Ok(reviewer);
 
@@ -52,11 +55,13 @@ namespace PokemonApi.Controllers
         [HttpGet("{reviewerId}/reviews")]
         [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Review>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReviewsOfReviewer(int reviewerId)
         {
-            var reviews = _mapper.Map<List<ReviewDto>>(await _reviewerRepository.GetReviewsByReviewer(reviewerId));
+            var reviews = _mapper.Map<List<GetReviewRequest>>(await _reviewerRepository.GetReviewsByReviewer(reviewerId));
 
             return Ok(reviews);
 
@@ -64,9 +69,12 @@ namespace PokemonApi.Controllers
 
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(422)]
-        async public Task<IActionResult> CreateReviewer([FromBody] ReviewerDto reviewerToCreate)
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> CreateReviewer([FromBody] CreateReviewerRequest reviewerToCreate)
         {
             if(reviewerToCreate == null) return BadRequest(ModelState);
 
@@ -95,8 +103,10 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-       async public Task<IActionResult> UpdateReviewer(int reviewerId,  [FromBody] ReviewerDto reviewerToUpdate)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> UpdateReviewer(int reviewerId,  [FromBody] UpdateReviewerRequest reviewerToUpdate)
         {
 
             if (reviewerToUpdate == null) return BadRequest(ModelState);
@@ -116,7 +126,9 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         async public Task<IActionResult> DeletePokemon(int reviewerId)
         {
             var reviewer = await _reviewerRepository.GetReviewerById(reviewerId);

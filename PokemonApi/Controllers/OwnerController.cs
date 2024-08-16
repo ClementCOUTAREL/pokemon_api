@@ -31,11 +31,12 @@ namespace PokemonApi.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetOwners()
         {
-            var owners = _mapper.Map<List<OwnerDto>>(await _ownerRepository.GetOwners());
+            var owners = _mapper.Map<List<GetOwnerRequest>>(await _ownerRepository.GetOwners());
 
             return Ok(owners);
         }
@@ -43,11 +44,12 @@ namespace PokemonApi.Controllers
         [HttpGet("{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(OwnerExistValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(Owner))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Owner))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetOwner(int ownerId)
         {
-            var owner = _mapper.Map<OwnerDto>(await _ownerRepository.GetOwner(ownerId));
+            var owner = _mapper.Map<GetOwnerRequest>(await _ownerRepository.GetOwner(ownerId));
 
             return Ok(owner);
         }
@@ -55,11 +57,12 @@ namespace PokemonApi.Controllers
         [HttpGet("pokemons/{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetOwnerOfAPokemon(int pokeId)
         {
-            var owners = _mapper.Map<List<OwnerDto>>(await _ownerRepository.GetOwnerOfAPokemon(pokeId));
+            var owners = _mapper.Map<List<GetOwnerRequest>>(await _ownerRepository.GetOwnerOfAPokemon(pokeId));
 
             return Ok(owners);
         }
@@ -67,20 +70,24 @@ namespace PokemonApi.Controllers
         [HttpGet("{ownerId}/pokemons")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(OwnerExistValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Pokemon>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetPokemonOfAnOwner(int ownerId)
         {
-            var pokemons = _mapper.Map<List<PokemonDto>>(await _ownerRepository.GetPokemonOfAnOwner(ownerId));
+            var pokemons = _mapper.Map<List<GetPokemonRequest>>(await _ownerRepository.GetPokemonOfAnOwner(ownerId));
 
             return Ok(pokemons);
         }
 
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(422)]
-       async public Task<IActionResult> CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerToCreate)
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> CreateOwner([FromQuery] int countryId, [FromBody] CreateOwnerRequest ownerToCreate)
         {
             if (ownerToCreate == null) return BadRequest(ModelState);
 
@@ -114,7 +121,9 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        async public Task<IActionResult> UpdateOwner(int ownerId, [FromBody] OwnerDto ownerToUpdate)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> UpdateOwner(int ownerId, [FromBody] UpdateOwnerRequest ownerToUpdate)
         {
             if (ownerToUpdate == null) return BadRequest(ModelState);
 

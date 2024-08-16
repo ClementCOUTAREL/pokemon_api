@@ -13,20 +13,30 @@ namespace PokemonApi.Helper
     {
         public MapperProfiles()
         {
-            CreateMap<Pokemon, PokemonDto>().ReverseMap();
-            CreateMap<Pokemon, PokemonToUpdateDto>().ReverseMap();
-            
-            CreateMap<Category, CategoryDto>().ReverseMap();
-            CreateMap<Category, CreateCategoryRequest>().ReverseMap();
+            CreateMap<Pokemon, GetPokemonRequest>().ReverseMap();
+            CreateMap<Pokemon, UpdatePokemonRequest>().ReverseMap();
+            CreateMap<Pokemon, CreatePokemonRequest>().ReverseMap();
 
-            CreateMap<Country, CountryDto>().ReverseMap();
-            
-            CreateMap<Owner, OwnerDto>().ReverseMap();
-           
-            CreateMap<Review, ReviewDto>().ReverseMap();
-            
-            CreateMap<Reviewer, ReviewerDto>().ReverseMap();
-            
+            CreateMap<Category, GetCategoryRequest>().ReverseMap();
+            CreateMap<Category, CreateCategoryRequest>().ReverseMap();
+            CreateMap<Category, UpdatePokemonRequest>().ReverseMap();
+
+            CreateMap<Country, GetCountryRequest>().ReverseMap();
+            CreateMap<Country, CreateCountryRequest>().ReverseMap();
+            CreateMap<Country, UpdateCountryRequest>().ReverseMap();
+
+            CreateMap<Owner, GetOwnerRequest>().ReverseMap();
+            CreateMap<Owner, CreateOwnerRequest>().ReverseMap();
+            CreateMap<Owner, UpdateOwnerRequest>().ReverseMap();
+
+            CreateMap<Review, GetReviewRequest>().ReverseMap();
+            CreateMap<Review, CreateReviewRequest>().ReverseMap();
+            CreateMap<Review, UpdateReviewRequest>().ReverseMap();
+
+            CreateMap<Reviewer, GetReviewerRequest>().ReverseMap();
+            CreateMap<Reviewer, CreateReviewerRequest>().ReverseMap();
+            CreateMap<Reviewer, UpdateReviewerRequest>().ReverseMap();
+
         }
     }
 }

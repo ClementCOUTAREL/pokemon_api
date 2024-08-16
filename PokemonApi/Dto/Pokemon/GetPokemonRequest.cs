@@ -1,11 +1,9 @@
-﻿using PokemonApi.Models;
-
-namespace PokemonApi.Dto.Pokemon
+﻿namespace PokemonApi.Dto.Pokemon
 {
-    public class PokemonToUpdateDto
+    public class GetPokemonRequest
     {
+        public int Id { get; set; }
         public string Name { get; set; } = null!;
         public DateTime BirthDate { get; set; }
-
     }
 }

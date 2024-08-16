@@ -26,10 +26,13 @@ namespace PokemonApi.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Country>))]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Country>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+
         async public Task<IActionResult> GetCountries()
         {
-            var countries = _mapper.Map<List<CountryDto>>(await _countryRepository.GetCountries());
+            var countries = _mapper.Map<List<GetCountryRequest>>(await _countryRepository.GetCountries());
 
             return Ok(countries);
         }
@@ -37,10 +40,12 @@ namespace PokemonApi.Controllers
         [HttpGet("owners/{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(OwnerExistValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(Country))]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Country))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetCountryOfAnOwner(int ownerId)
         {
-            var country = _mapper.Map<CountryDto>(await _countryRepository.GetCountryByOwner(ownerId));
+            var country = _mapper.Map<GetCountryRequest>(await _countryRepository.GetCountryByOwner(ownerId));
 
             return Ok(country);
         }
@@ -48,21 +53,24 @@ namespace PokemonApi.Controllers
         [HttpGet("{countryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(CountryExistsValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Owner>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetOwnerFromCountry(int countryId)
         {
 
-            var owners = _mapper.Map<List<OwnerDto>>(await _countryRepository.GetOwnerFromCountry(countryId));
+            var owners = _mapper.Map<List<GetOwnerRequest>>(await _countryRepository.GetOwnerFromCountry(countryId));
 
             return Ok(owners);
         }
 
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        async public Task<IActionResult> CreateCountry(CountryDto countryToCreate)
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        async public Task<IActionResult> CreateCountry(CreateCountryRequest countryToCreate)
         {
             if (countryToCreate == null) return BadRequest(ModelState);
 
@@ -90,8 +98,8 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(CountryExistsValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        async public Task<IActionResult> UpdateCountry(int countryId, [FromBody] CountryDto countryToUpdate)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        async public Task<IActionResult> UpdateCountry(int countryId, [FromBody] UpdateCountryRequest countryToUpdate)
         {
             if (countryToUpdate == null) return BadRequest(ModelState);
 

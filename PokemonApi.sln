@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonApi", "PokemonApi\PokemonApi.csproj", "{CADD2030-BE97-4E2B-806F-A0F2B3E6213B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonApi", "PokemonApi\PokemonApi.csproj", "{CADD2030-BE97-4E2B-806F-A0F2B3E6213B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Éléments de solution", "Éléments de solution", "{42C63A39-C7AA-40A4-A2BB-4A8ACF8685BA}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonAPITests", "PokemonAPITests\PokemonAPITests.csproj", "{44B78131-312A-4F99-8597-E85DA4367B0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,10 @@ Global
 		{CADD2030-BE97-4E2B-806F-A0F2B3E6213B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CADD2030-BE97-4E2B-806F-A0F2B3E6213B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CADD2030-BE97-4E2B-806F-A0F2B3E6213B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44B78131-312A-4F99-8597-E85DA4367B0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44B78131-312A-4F99-8597-E85DA4367B0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44B78131-312A-4F99-8597-E85DA4367B0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44B78131-312A-4F99-8597-E85DA4367B0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

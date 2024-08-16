@@ -33,8 +33,9 @@ namespace PokemonApi.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Review>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReviews()
         {
             var reviews = _mapper.Map<List<Review>>(await _reviewRepository.GetReviews());
@@ -45,8 +46,10 @@ namespace PokemonApi.Controllers
         [HttpGet("{reviewId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(ReviewExistsValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(Review))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Review))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReview(int reviewId)
         { 
 
@@ -58,8 +61,10 @@ namespace PokemonApi.Controllers
         [HttpGet("pokemon/{pokeId}")]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Review>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetReviewsOfAPokemon(int pokeId)
         {
             var reviews = _mapper.Map<List<Review>>(await _reviewRepository.GetReviewsOfAPokemon(pokeId));
@@ -69,9 +74,15 @@ namespace PokemonApi.Controllers
 
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        async public Task<IActionResult> CreateReview([FromQuery] int reviewerId, [FromQuery] int pokeId, [FromBody] ReviewDto reviewToCreate)
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> CreateReview(
+            [FromQuery] int reviewerId,
+            [FromQuery] int pokeId,
+            [FromBody] CreateReviewRequest reviewToCreate)
         { 
             if(reviewToCreate == null) return BadRequest(ModelState);
 
@@ -107,7 +118,12 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        async public Task<IActionResult> UpdateReview(int reviewId,[FromQuery] int pokeId, [FromQuery] int reviewerId, [FromBody] ReviewDto reviewToUpdate)
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        async public Task<IActionResult> UpdateReview(
+            int reviewId,
+            [FromQuery] int pokeId,
+            [FromQuery] int reviewerId,
+            [FromBody] UpdateReviewRequest reviewToUpdate)
         {
             if( reviewToUpdate == null) return BadRequest(ModelState);
 
@@ -130,6 +146,7 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         async public Task<IActionResult> DeleteReview(int reviewId)
         {
             var review = await _reviewRepository.GetReviewById(reviewId);

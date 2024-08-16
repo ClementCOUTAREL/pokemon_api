@@ -32,11 +32,12 @@ namespace PokemonApi.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
-        [ProducesResponseType(422)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Pokemon>))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         async public Task<IActionResult> GetPokemons()
         {
-            var pokemons = _mapper.Map<List<PokemonDto>>(await _pokemonRepository.GetPokemons());
+            var pokemons = _mapper.Map<List<GetPokemonRequest>>(await _pokemonRepository.GetPokemons());
 
             return Ok(pokemons);
         }
@@ -44,11 +45,13 @@ namespace PokemonApi.Controllers
         [HttpGet("{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
-        [ProducesResponseType(200, Type = typeof(Pokemon))]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Pokemon))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         async public Task<IActionResult> GetPokemon(int pokeId)
         {
-            var pokemon = _mapper.Map<PokemonDto>(await _pokemonRepository.GetPokemon(pokeId));
+            var pokemon = _mapper.Map<GetPokemonRequest>(await _pokemonRepository.GetPokemon(pokeId));
 
             return Ok(pokemon);
         }
@@ -57,8 +60,10 @@ namespace PokemonApi.Controllers
         [HttpGet("{pokeId}/rating")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         async public Task<IActionResult> getPokemonRating(int pokeId)
         {
             var rating = await _pokemonRepository.GetPokemonRating(pokeId);
@@ -68,12 +73,15 @@ namespace PokemonApi.Controllers
 
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         async public Task<IActionResult> CreatePokemon(
             [FromQuery] int ownerId,
             [FromQuery] int catId,
-            [FromBody] PokemonDto pokemonToCreate)
+            [FromBody] CreatePokemonRequest pokemonToCreate)
         {
             if(pokemonToCreate == null) return BadRequest(ModelState);
 
@@ -102,8 +110,13 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        async public Task<IActionResult> UpdatePokemon(int pokeId, [FromQuery] int ownerId, int catId , [FromBody] PokemonToUpdateDto pokemonToUpdate)
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        async public Task<IActionResult> UpdatePokemon(
+            int pokeId,
+            [FromQuery] int ownerId,
+            int catId ,
+            [FromBody] UpdatePokemonRequest pokemonToUpdate)
         { 
             if(pokemonToUpdate == null) return BadRequest(ModelState);
 
@@ -126,8 +139,9 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-       async public Task<IActionResult> DeletePokemon(int pokeId)
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        async public Task<IActionResult> DeletePokemon(int pokeId)
         {
             var pokemon = await _pokemonRepository.GetPokemon(pokeId);
 

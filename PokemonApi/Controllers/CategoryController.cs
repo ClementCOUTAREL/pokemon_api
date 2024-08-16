@@ -25,7 +25,8 @@ namespace PokemonApi.Controllers
         [HttpGet]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [Produces("application/json")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))]
+        [ProducesResponseType((int)HttpStatusCode.Accepted, Type = typeof(IEnumerable<Category>))]
+        [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         async public Task<IActionResult> GetCategories()
         {
             var categories = await _categoryRepository.GetCategories();
@@ -37,11 +38,11 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CategoryExistsAttribute))]
         [Produces("application/json")]
-        [ProducesResponseType(200, Type = typeof(Category))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Accepted, Type = typeof(Category))]
+        [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         async public Task<IActionResult> GetCategory(int categoryId)
         {
-            var category = _mapper.Map<CategoryDto>(await _categoryRepository.GetCategory(categoryId));
+            var category = _mapper.Map<GetCategoryRequest>(await _categoryRepository.GetCategory(categoryId));
 
             return Ok(category);
         }
@@ -50,12 +51,12 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CategoryExistsAttribute))]
         [Produces("application/json")]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
-        [ProducesResponseType(400)]
+        [ProducesResponseType((int)HttpStatusCode.Accepted, Type = typeof(IEnumerable<Pokemon>))]
+        [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         async public Task<IActionResult> GetPokemonByCategoryId(int categoryId)
         {
 
-            var pokemons = _mapper.Map<List<PokemonDto>>(await _categoryRepository.GetPokemonByCategory(categoryId));
+            var pokemons = _mapper.Map<List<GetPokemonRequest>>(await _categoryRepository.GetPokemonByCategory(categoryId));
 
             return Ok(pokemons);
         }
@@ -63,8 +64,8 @@ namespace PokemonApi.Controllers
         [HttpPost]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [Produces("application/json")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         async public Task<IActionResult> CreateCategory(
             [FromBody] CreateCategoryRequest categoryToCreate)
         {
@@ -94,7 +95,7 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        async public Task<IActionResult> UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
+        async public Task<IActionResult> UpdateCategory(int categoryId, [FromBody] UpdateCategoryRequest categoryToUpdate)
         {
             if (categoryToUpdate == null) return BadRequest(ModelState);
 
@@ -116,7 +117,7 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CategoryExistsAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         async public Task<IActionResult> DeleteCategory(int categoryId)
         {
             var category = await _categoryRepository.GetCategory(categoryId);
