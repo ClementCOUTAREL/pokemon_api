@@ -108,12 +108,12 @@ namespace PokemonApi.Controllers
         [HttpPut("{pokeId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult UpdatePokemon(int pokeId, [FromQuery] int ownerId, int catId , [FromBody] PokemonToUpdateDto pokemonToUpdate)
+        async public Task<IActionResult> UpdatePokemon(int pokeId, [FromQuery] int ownerId, int catId , [FromBody] PokemonToUpdateDto pokemonToUpdate)
         { 
             if(pokemonToUpdate == null) return BadRequest(ModelState);
 
             if (!_pokemonRepository.IsPokemonExists(pokeId)) return NotFound();
-            if (!_categoryRepository.isCategoryExists(catId)) return NotFound();
+            if (!await _categoryRepository.isCategoryExists(catId)) return NotFound();
             if (!_ownerRepository.isOwnerExists(ownerId)) return NotFound();
 
             if (!ModelState.IsValid) return BadRequest(ModelState);

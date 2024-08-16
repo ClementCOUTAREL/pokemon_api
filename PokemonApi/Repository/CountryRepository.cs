@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Data;
 using PokemonApi.Dto;
 using PokemonApi.Interface;
@@ -16,52 +17,52 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public ICollection<Country> GetCountries()
+        async public Task<ICollection<Country>> GetCountries()
         {
-            return _context.Countries.OrderBy(c => c.Id).ToList();
+            return await _context.Countries.OrderBy(c => c.Id).ToListAsync();
         }
 
-        public Country GetCountry(int countryId)
+        async public Task<Country> GetCountry(int countryId)
         {
-            return _context.Countries.Where(c => c.Id == countryId).FirstOrDefault();
+            return await _context.Countries.Where(c => c.Id == countryId).FirstOrDefaultAsync();
         }
 
-        public Country GetCountryByOwner(int ownerId)
+        async public Task<Country> GetCountryByOwner(int ownerId)
         {
-            return _context.Owners.Where(o => o.Id == ownerId).Select(c => c.Country).FirstOrDefault();
+            return await _context.Owners.Where(o => o.Id == ownerId).Select(c => c.Country).FirstOrDefaultAsync();
         }
 
-        public ICollection<Owner> GetOwnerFromCountry(int countryId)
+        async public Task<ICollection<Owner>> GetOwnerFromCountry(int countryId)
         {
-            return _context.Countries.Where(c => c.Id == countryId).Select(o => o.Owner ).FirstOrDefault();
+            return await _context.Countries.Where(c => c.Id == countryId).Select(o => o.Owner ).FirstOrDefaultAsync();
         }
 
-        public bool isCountryExists(int countryId)
+        async public Task<bool> isCountryExists(int countryId)
         {
-            return _context.Countries.Any(c => c.Id == countryId);
+            return await _context.Countries.AnyAsync(c => c.Id == countryId);
         }
 
-        public bool CreateCountry(Country country)
+        async public Task<bool> CreateCountry(Country country)
         {
             _context.Add(country);
-            return Save();
+            return await Save();
         }
 
-        public bool Save()
-        {
-            return _context.SaveChanges() > 0 ? true : false;
-        }
-
-        public bool UpdateCountry(Country country)
+        async public Task<bool> UpdateCountry(Country country)
         {
             _context.Update(country);
-            return Save();
+            return await Save();
         }
 
-        public bool DeleteCountry(Country country)
+        async public Task<bool> DeleteCountry(Country country)
         {
             _context.Remove(country);
-            return Save();
+            return await Save();
+        }
+
+        async public Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0 ? true : false;
         }
     }
 }

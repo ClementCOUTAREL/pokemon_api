@@ -16,9 +16,9 @@ namespace PokemonApi.Shared.Validation.Category
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (context.ActionArguments.TryGetValue("catId", out var idVal) && idVal is int id)
+            if (context.ActionArguments.TryGetValue("categoryId", out var idVal) && idVal is int id)
             {
-                if (!_repo.isCategoryExists(id))
+                if (!await _repo.isCategoryExists(id))
                 {
                     context.Result = new UnprocessableEntityObjectResult("category doesn't exist");
                     return;

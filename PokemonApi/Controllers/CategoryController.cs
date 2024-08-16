@@ -26,36 +26,36 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Category>))]
-        public IActionResult GetCategories()
+        async public Task<IActionResult> GetCategories()
         {
-            var categories = _categoryRepository.GetCategories();
+            var categories = await _categoryRepository.GetCategories();
 
             return Ok(categories);
         }
 
-        [HttpGet("{catId}")]
+        [HttpGet("{categoryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CheckCategoryExistsAttribute))]
         [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(Category))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public IActionResult GetCategory(int catId)
+        async public Task<IActionResult> GetCategory(int categoryId)
         {
-            var category = _mapper.Map<CategoryDto>(_categoryRepository.GetCategory(catId));
+            var category = _mapper.Map<CategoryDto>(await _categoryRepository.GetCategory(categoryId));
 
             return Ok(category);
         }
 
-        [HttpGet("{catId}/pokemon")]
+        [HttpGet("{categoryId}/pokemon")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CheckCategoryExistsAttribute))]
         [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
         [ProducesResponseType(400)]
-        public IActionResult GetPokemonByCategoryId(int catId)
+        async public Task<IActionResult> GetPokemonByCategoryId(int categoryId)
         {
 
-            var pokemons = _mapper.Map<List<PokemonDto>>(_categoryRepository.GetPokemonByCategory(catId));
+            var pokemons = _mapper.Map<List<PokemonDto>>(await _categoryRepository.GetPokemonByCategory(categoryId));
 
             return Ok(pokemons);
         }
@@ -65,11 +65,11 @@ namespace PokemonApi.Controllers
         [Produces("application/json")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateCategory(
+        async public Task<IActionResult> CreateCategory(
             [FromBody] CreateCategoryRequest categoryToCreate)
         {
-            var category = _categoryRepository
-                .GetCategories()
+            var categories = await _categoryRepository.GetCategories();
+            var category = categories
                 .Where(c => c.Name.Trim().ToUpper() == categoryToCreate.Name.Trim().ToUpper())
                 .FirstOrDefault();
 
@@ -81,7 +81,7 @@ namespace PokemonApi.Controllers
             
             var categoryMap = _mapper.Map<Category>(categoryToCreate);
 
-            if (!_categoryRepository.CreateCategory(categoryMap))
+            if (!await _categoryRepository.CreateCategory(categoryMap))
             {
                 ModelState.AddModelError("", "Something wrong happened while saving");
                 return StatusCode(500, ModelState);
@@ -94,15 +94,16 @@ namespace PokemonApi.Controllers
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        public IActionResult UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
+        async public Task<IActionResult> UpdateCategory(int categoryId, [FromBody] CategoryDto categoryToUpdate)
         {
             if (categoryToUpdate == null) return BadRequest(ModelState);
 
-            if (_categoryRepository.GetCategory(categoryId) == null) return NotFound(ModelState);
+
+            if (await _categoryRepository.GetCategory(categoryId) == null) return NotFound(ModelState);
 
             var categoryMap = _mapper.Map<Category>(categoryToUpdate);
 
-            if (!_categoryRepository.UpdateCategory(categoryMap))
+            if (!await _categoryRepository.UpdateCategory(categoryMap))
             {
                 ModelState.AddModelError("", "An error occured while updating");
                 return StatusCode(StatusCodes.Status500InternalServerError, ModelState);
@@ -111,16 +112,16 @@ namespace PokemonApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{catId}")]
+        [HttpDelete("{categoryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [TypeFilter(typeof(CheckCategoryExistsAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public IActionResult DeleteCategory(int catId)
+        async public Task<IActionResult> DeleteCategory(int categoryId)
         {
-            var category = _categoryRepository.GetCategory(catId);
+            var category = await _categoryRepository.GetCategory(categoryId);
 
-            if(!_categoryRepository.DeleteCategory(category))
+            if(!await _categoryRepository.DeleteCategory(category))
             {
                 ModelState.AddModelError("", "An error occured while deleting");
                 return StatusCode((int)HttpStatusCode.InternalServerError, ModelState);
@@ -128,7 +129,5 @@ namespace PokemonApi.Controllers
 
             return NoContent();
         }
-
     }
-
 }

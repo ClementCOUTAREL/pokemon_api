@@ -4,13 +4,13 @@ namespace PokemonApi.Interface
 {
     public interface ICategoryRepository
     {
-        ICollection<Category> GetCategories();
-        Category GetCategory(int catId);
-        ICollection<Pokemon> GetPokemonByCategory(int catId);
-        bool isCategoryExists(int catId);
-        bool CreateCategory(Category category);
-        bool UpdateCategory(Category category);
-        bool DeleteCategory(Category category);
-        bool Save();
+        Task<ICollection<Category>> GetCategories();
+        Task<Category> GetCategory(int catId);
+        Task<ICollection<Pokemon>> GetPokemonByCategory(int catId);
+        Task<bool> isCategoryExists(int catId);
+        Task<bool> CreateCategory(Category category);
+        Task<bool> UpdateCategory(Category category);
+        Task<bool> DeleteCategory(Category category);
+        Task<bool> Save();
     }
 }

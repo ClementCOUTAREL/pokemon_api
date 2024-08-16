@@ -1,4 +1,5 @@
-﻿using PokemonApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 
@@ -12,54 +13,53 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public ICollection<Owner> GetOwners()
+        async public Task<ICollection<Owner>> GetOwners()
         {
-            return _context.Owners.OrderBy(o => o.Id).ToList();
+            return await _context.Owners.OrderBy(o => o.Id).ToListAsync();
         }
 
-        public Owner GetOwner(int ownerId)
+        async public Task<Owner> GetOwner(int ownerId)
         {
-            return _context.Owners.Where(o => o.Id == ownerId).FirstOrDefault();
+            return await _context.Owners.Where(o => o.Id == ownerId).FirstOrDefaultAsync();
         }
 
-        public ICollection<Owner> GetOwnerOfAPokemon(int pokeId)
+        async public Task<ICollection<Owner>> GetOwnerOfAPokemon(int pokeId)
         {
-            return _context.PokemonOwners.Where(p => p.Pokemon.Id == pokeId).Select(o => o.Owner).ToList();
+            return await _context.PokemonOwners.Where(p => p.Pokemon.Id == pokeId).Select(o => o.Owner).ToListAsync();
         }
 
         
 
-        public ICollection<Pokemon> GetPokemonOfAnOwner(int ownerId)
+        async public Task<ICollection<Pokemon>> GetPokemonOfAnOwner(int ownerId)
         {
-            return _context.PokemonOwners.Where(o => o.Owner.Id == ownerId).Select(p => p.Pokemon).ToList();
+            return await _context.PokemonOwners.Where(o => o.Owner.Id == ownerId).Select(p => p.Pokemon).ToListAsync();
         }
 
-        public bool isOwnerExists(int ownerId)
+        async public Task<bool> isOwnerExists(int ownerId)
         {
-            return _context.Owners.Any(o => o.Id == ownerId);
+            return await _context.Owners.AnyAsync(o => o.Id == ownerId);
         }
 
-        public bool CreateOwner(Owner owner)
+        async public Task<bool> CreateOwner(Owner owner)
         {
             _context.Add(owner);
-            return Save();
+            return await Save();
         }
 
-        public bool Save()
-        {
-            return _context.SaveChanges() > 0 ? true : false;
-        }
-
-        public bool UpdateOwner(Owner owner)
+       async public Task<bool> UpdateOwner(Owner owner)
         {
             _context.Update(owner);
-            return Save();
+            return await Save();
         }
 
-        public bool DeleteOwner(Owner owner)
+        async public Task<bool> DeleteOwner(Owner owner)
         {
             _context.Remove(owner);
-            return Save();
+            return await Save();
+        }
+        async public Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() > 0 ? true : false;
         }
     }
 }

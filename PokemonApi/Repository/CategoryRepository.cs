@@ -1,4 +1,5 @@
-﻿using PokemonApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PokemonApi.Data;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 
@@ -12,49 +13,49 @@ namespace PokemonApi.Repository
             _context = context;
         }
 
-        public bool isCategoryExists(int catId)
+        async public Task<bool> isCategoryExists(int catId)
         {
-            return _context.Categories.Any(c => c.Id == catId);
+            return await _context.Categories.AnyAsync(c => c.Id == catId);
         }
 
-        public ICollection<Category> GetCategories()
+        async public Task<ICollection<Category>> GetCategories()
         {
-            return _context.Categories.OrderBy(c => c.Id).ToList();   
+            return await _context.Categories.OrderBy(c => c.Id).ToListAsync();   
         }
 
-        public Category GetCategory(int catId)
+        async public Task<Category> GetCategory(int catId)
         {
-            return _context.Categories.Where(c => c.Id == catId).FirstOrDefault();
+            return await _context.Categories.Where(c => c.Id == catId).FirstOrDefaultAsync();
         }
 
-        public ICollection<Pokemon> GetPokemonByCategory(int catId)
+        async public Task<ICollection<Pokemon>> GetPokemonByCategory(int catId)
         {
-            return _context.PokemonCategories.Where(pc => pc.CategoryId == catId).Select(c => c.Pokemon).ToList();
+            return await _context.PokemonCategories.Where(pc => pc.CategoryId == catId).Select(c => c.Pokemon).ToListAsync();
         }
 
-        public bool CreateCategory(Category category)
+        async public Task<bool> CreateCategory(Category category)
         {
-            _context.Add<Category>(category);
+            await _context.AddAsync<Category>(category);
 
-            return Save();
+            return await Save();
 
         }
 
-        public bool UpdateCategory(Category category)
+        async public Task<bool> UpdateCategory(Category category)
         {
             _context.Update(category);
-            return Save();
+            return await Save();
         }
 
-        public bool DeleteCategory(Category category)
+        async public Task<bool> DeleteCategory(Category category)
         {
             _context.Remove(category);
-            return Save();
+            return await Save();
         }
 
-        public bool Save()
+        async public Task<bool> Save()
         {
-            return _context.SaveChanges() > 0 ? true : false;
+            return await _context.SaveChangesAsync() > 0 ? true : false;
         }
     }
 }
