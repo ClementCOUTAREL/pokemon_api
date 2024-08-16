@@ -4,6 +4,8 @@ using PokemonApi.Dto.Pokemon;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Owner;
+using PokemonApi.Shared.Validation.Pokemon;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -41,12 +43,11 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(Pokemon))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetPokemon(int pokeId)
         {
-            if (!await _pokemonRepository.IsPokemonExists(pokeId)) return BadRequest();
-
             var pokemon = _mapper.Map<PokemonDto>(await _pokemonRepository.GetPokemon(pokeId));
 
             return Ok(pokemon);
@@ -55,13 +56,11 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{pokeId}/rating")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         async public Task<IActionResult> getPokemonRating(int pokeId)
         {
-            if (!await _pokemonRepository.IsPokemonExists(pokeId))
-                return BadRequest();
-
             var rating = await _pokemonRepository.GetPokemonRating(pokeId);
 
             return Ok(rating);
@@ -80,7 +79,7 @@ namespace PokemonApi.Controllers
 
             var pokemons = await _pokemonRepository.GetPokemons();
 
-                var pokemon = pokemons.Where(p => p.Name.Trim().ToUpper() == pokemonToCreate.Name.Trim().ToUpper()).FirstOrDefault();
+            var pokemon = pokemons.Where(p => p.Name.Trim().ToUpper() == pokemonToCreate.Name.Trim().ToUpper()).FirstOrDefault();
 
             if (pokemon != null)
             {
@@ -101,15 +100,15 @@ namespace PokemonApi.Controllers
 
         [HttpPut("{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         async public Task<IActionResult> UpdatePokemon(int pokeId, [FromQuery] int ownerId, int catId , [FromBody] PokemonToUpdateDto pokemonToUpdate)
         { 
             if(pokemonToUpdate == null) return BadRequest(ModelState);
 
-            if (!await _pokemonRepository.IsPokemonExists(pokeId)) return NotFound();
-            if (!await _categoryRepository.isCategoryExists(catId)) return NotFound();
-            if (!await _ownerRepository.isOwnerExists(ownerId)) return NotFound();
+            if (!await _categoryRepository.isCategoryExists(catId)) return NotFound("Category not found");
+            if (!await _ownerRepository.isOwnerExists(ownerId)) return NotFound("owner not found");
 
             var pokemonMap = _mapper.Map<Pokemon>(pokemonToUpdate);
 
@@ -125,12 +124,11 @@ namespace PokemonApi.Controllers
 
         [HttpDelete("{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
        async public Task<IActionResult> DeletePokemon(int pokeId)
         {
-            if (!await _pokemonRepository.IsPokemonExists(pokeId)) return BadRequest(ModelState);
-
             var pokemon = await _pokemonRepository.GetPokemon(pokeId);
 
             if (!await _pokemonRepository.DeletePokemon(pokemon))

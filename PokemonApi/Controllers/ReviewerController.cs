@@ -6,6 +6,7 @@ using PokemonApi.Interface;
 using PokemonApi.Models;
 using PokemonApi.Repository;
 using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Reviewer;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -36,13 +37,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet("{reviewerId}")]
+        [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(Reviewer))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetReviewers(int reviewerId)
         {
-            if(!await _reviewerRepository.isReviewerExists(reviewerId)) return BadRequest();
-
             var reviewer = _mapper.Map<ReviewerDto>(await _reviewerRepository.GetReviewerById(reviewerId));
 
             return Ok(reviewer);
@@ -50,13 +50,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet("{reviewerId}/reviews")]
+        [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetReviewsOfReviewer(int reviewerId)
         {
-            if (!await _reviewerRepository.isReviewerExists(reviewerId)) return BadRequest();
-
             var reviews = _mapper.Map<List<ReviewDto>>(await _reviewerRepository.GetReviewsByReviewer(reviewerId));
 
             return Ok(reviews);
@@ -93,6 +92,7 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{reviewerId}")]
+        [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -100,8 +100,6 @@ namespace PokemonApi.Controllers
         {
 
             if (reviewerToUpdate == null) return BadRequest(ModelState);
-
-            if (!await _reviewerRepository.isReviewerExists(reviewerId)) return NotFound();
 
             var reviewerMap = _mapper.Map<Reviewer>(reviewerToUpdate);
 
@@ -115,12 +113,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpDelete("{reviewerId}")]
+        [ServiceFilter(typeof(ReviewerExistsValidationFilter))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> DeletePokemon(int reviewerId)
         {
-            if (!await _reviewerRepository.isReviewerExists(reviewerId)) return BadRequest(ModelState);
             var reviewer = await _reviewerRepository.GetReviewerById(reviewerId);
 
             if (!await _reviewerRepository.DeleteReviewer(reviewer))

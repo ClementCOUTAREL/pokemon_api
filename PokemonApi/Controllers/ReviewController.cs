@@ -4,6 +4,8 @@ using PokemonApi.Dto.Review;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Pokemon;
+using PokemonApi.Shared.Validation.Review;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -42,11 +44,11 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{reviewId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(ReviewExistsValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(Review))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetReview(int reviewId)
         { 
-            if(!await _reviewRepository.isReviewExists(reviewId)) return BadRequest();
 
             var review = _mapper.Map<Review>(await _reviewRepository.GetReviewById(reviewId));
 
@@ -54,13 +56,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet("pokemon/{pokeId}")]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Review>))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetReviewsOfAPokemon(int pokeId)
         {
-            if(!await _pokemonRepository.IsPokemonExists(pokeId)) return BadRequest();
-
             var reviews = _mapper.Map<List<Review>>(await _reviewRepository.GetReviewsOfAPokemon(pokeId));
 
             return Ok(reviews);
@@ -74,8 +75,10 @@ namespace PokemonApi.Controllers
         { 
             if(reviewToCreate == null) return BadRequest(ModelState);
 
+            if (await _pokemonRepository.IsPokemonExists(pokeId)) return NotFound("Pokemon not found");
+            if (await _reviewerRepository.isReviewerExists(reviewerId)) return NotFound("Reviewer not found");
+            
             var reviews = await _reviewRepository.GetReviews();
-
             var review = reviews.Where(r => r.Title.Trim().ToUpper() == reviewToCreate.Title.Trim().ToUpper()).FirstOrDefault();
 
             if(review != null)
@@ -100,13 +103,13 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{reviewId}")]
+        [ServiceFilter(typeof(ReviewExistsValidationAttribute))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> UpdateReview(int reviewId,[FromQuery] int pokeId, [FromQuery] int reviewerId, [FromBody] ReviewDto reviewToUpdate)
         {
             if( reviewToUpdate == null) return BadRequest(ModelState);
-            if(!await _reviewRepository.isReviewExists(reviewId)) return NotFound();
 
             var reviewMap = _mapper.Map<Review>(reviewToUpdate);
 
@@ -123,12 +126,12 @@ namespace PokemonApi.Controllers
         }
 
         [HttpDelete("{reviewId}")]
+        [ServiceFilter(typeof(ReviewExistsValidationAttribute))]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> DeleteReview(int reviewId)
         {
-            if (!await _reviewRepository.isReviewExists(reviewId)) return BadRequest(ModelState);
             var review = await _reviewRepository.GetReviewById(reviewId);
 
             if (!await _reviewRepository.DeleteReview(review))

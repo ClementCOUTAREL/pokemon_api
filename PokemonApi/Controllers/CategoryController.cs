@@ -35,7 +35,7 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{categoryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
+        [TypeFilter(typeof(CategoryExistsAttribute))]
         [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(Category))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -48,7 +48,7 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{categoryId}/pokemon")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
+        [TypeFilter(typeof(CategoryExistsAttribute))]
         [Produces("application/json")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
         [ProducesResponseType(400)]
@@ -114,7 +114,7 @@ namespace PokemonApi.Controllers
 
         [HttpDelete("{categoryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
-        [TypeFilter(typeof(CheckCategoryExistsAttribute))]
+        [TypeFilter(typeof(CategoryExistsAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> DeleteCategory(int categoryId)

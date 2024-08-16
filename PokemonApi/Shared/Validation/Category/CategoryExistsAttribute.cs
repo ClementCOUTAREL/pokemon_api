@@ -5,11 +5,11 @@ using PokemonApi.Interface;
 
 namespace PokemonApi.Shared.Validation.Category
 {
-    public class CheckCategoryExistsAttribute : IAsyncActionFilter
+    public class CategoryExistsAttribute : IAsyncActionFilter
     {
         private readonly ICategoryRepository _repo;
 
-        public CheckCategoryExistsAttribute(ICategoryRepository repo)
+        public CategoryExistsAttribute(ICategoryRepository repo)
         {
             _repo = repo;
         }

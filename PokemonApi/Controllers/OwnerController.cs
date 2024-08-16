@@ -5,6 +5,9 @@ using PokemonApi.Dto.Pokemon;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Country;
+using PokemonApi.Shared.Validation.Owner;
+using PokemonApi.Shared.Validation.Pokemon;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -39,19 +42,19 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(Owner))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetOwner(int ownerId)
         {
-            if (!await _ownerRepository.isOwnerExists(ownerId)) return BadRequest();
-
-            var owner = _mapper.Map<OwnerDto>(_ownerRepository.GetOwner(ownerId));
+            var owner = _mapper.Map<OwnerDto>(await _ownerRepository.GetOwner(ownerId));
 
             return Ok(owner);
         }
 
         [HttpGet("pokemons/{pokeId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(PokemonExistsValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetOwnerOfAPokemon(int pokeId)
@@ -63,12 +66,11 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{ownerId}/pokemons")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Pokemon>))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetPokemonOfAnOwner(int ownerId)
         {
-            if (!await _ownerRepository.isOwnerExists(ownerId)) return BadRequest();
-
             var pokemons = _mapper.Map<List<PokemonDto>>(await _ownerRepository.GetPokemonOfAnOwner(ownerId));
 
             return Ok(pokemons);
@@ -81,6 +83,8 @@ namespace PokemonApi.Controllers
        async public Task<IActionResult> CreateOwner([FromQuery] int countryId, [FromBody] OwnerDto ownerToCreate)
         {
             if (ownerToCreate == null) return BadRequest(ModelState);
+
+            if(!await _countryRepository.isCountryExists(countryId)) return UnprocessableEntity("country doesn't exist");
 
             var owners = await _ownerRepository.GetOwners();
             var owner = owners.Where(o => o.LastName.Trim().ToUpper() == ownerToCreate.LastName.Trim().ToUpper()).FirstOrDefault();
@@ -107,13 +111,12 @@ namespace PokemonApi.Controllers
 
         [HttpPut("{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         async public Task<IActionResult> UpdateOwner(int ownerId, [FromBody] OwnerDto ownerToUpdate)
         {
             if (ownerToUpdate == null) return BadRequest(ModelState);
-
-            if (!await _ownerRepository.isOwnerExists(ownerId)) return BadRequest(ModelState);
 
             var ownerMap = _mapper.Map<Owner>(ownerToUpdate);
 
@@ -128,11 +131,11 @@ namespace PokemonApi.Controllers
 
         [HttpDelete("{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> DeleteOwner(int ownerId)
         {
-            if (!await _ownerRepository.isOwnerExists(ownerId)) return BadRequest(ModelState);
             var owner = await _ownerRepository.GetOwner(ownerId);
 
             if (!await _ownerRepository.DeleteOwner(owner))

@@ -5,6 +5,8 @@ using PokemonApi.Dto.Owner;
 using PokemonApi.Interface;
 using PokemonApi.Models;
 using PokemonApi.Shared.Filters;
+using PokemonApi.Shared.Validation.Country;
+using PokemonApi.Shared.Validation.Owner;
 using System.Net;
 
 namespace PokemonApi.Controllers
@@ -34,6 +36,7 @@ namespace PokemonApi.Controllers
 
         [HttpGet("owners/{ownerId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(OwnerExistValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(Country))]
         async public Task<IActionResult> GetCountryOfAnOwner(int ownerId)
         {
@@ -44,13 +47,11 @@ namespace PokemonApi.Controllers
 
         [HttpGet("{countryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(CountryExistsValidationAttribute))]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Owner>))]
         [ProducesResponseType(400)]
         async public Task<IActionResult> GetOwnerFromCountry(int countryId)
         {
-
-            if (!await _countryRepository.isCountryExists(countryId))
-                return BadRequest();
 
             var owners = _mapper.Map<List<OwnerDto>>(await _countryRepository.GetOwnerFromCountry(countryId));
 
@@ -87,13 +88,12 @@ namespace PokemonApi.Controllers
 
         [HttpPut("{countryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(CountryExistsValidationAttribute))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         async public Task<IActionResult> UpdateCountry(int countryId, [FromBody] CountryDto countryToUpdate)
         {
             if (countryToUpdate == null) return BadRequest(ModelState);
-
-            if (!await _countryRepository.isCountryExists(countryId)) return NotFound();
 
             var countryMap = _mapper.Map<Country>(countryToUpdate);
 
@@ -108,11 +108,11 @@ namespace PokemonApi.Controllers
 
         [HttpDelete("{countryId}")]
         [ServiceFilter(typeof(ModelValidationAttributeFilter))]
+        [ServiceFilter(typeof(CountryExistsValidationAttribute))]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         async public Task<IActionResult> DeleteCountry(int countryId)
         {
-            if (!await _countryRepository.isCountryExists(countryId)) return BadRequest(ModelState);
             var country = await _countryRepository.GetCountry(countryId);
 
             if(!await _countryRepository.DeleteCountry(country))
